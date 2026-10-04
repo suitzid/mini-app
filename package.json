@@ -4,7 +4,10 @@
   "private": true,
   "type": "module",
   "engines": { "node": ">=20.6" },
-  "scripts": { "start": "node --env-file=.env index.js" },
+  "scripts": {
+    "start": "node index.js",
+    "start:local": "node --env-file=.env index.js"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
     "express": "^4.19.2"
