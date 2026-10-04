@@ -15,7 +15,7 @@ const SUPABASE_KEY = env.SUPABASE_KEY || 'sb_publishable_4diavlnDFnk4B4JoFt0MSQ_
 const ADMIN_EMAIL = env.BOT_ADMIN_EMAIL;
 const ADMIN_PASSWORD = env.BOT_ADMIN_PASSWORD;
 
-if (!BOT_TOKEN  !PUBLIC_URL  !ADMIN_EMAIL || !ADMIN_PASSWORD) {
+if (!BOT_TOKEN || !PUBLIC_URL || !ADMIN_EMAIL || !ADMIN_PASSWORD) {
   console.error('Заполните .env: BOT_TOKEN, PUBLIC_URL, BOT_ADMIN_EMAIL, BOT_ADMIN_PASSWORD');
   process.exit(1);
 }
