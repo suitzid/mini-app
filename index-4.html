@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0d1512">
+<title>Orenix</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0b1210; --text:#f2f4ef; --text-2:#8b968f; --text-3:#66726c;
+  --accent:#4fd6b4; --accent-fill:#2eb896; --accent-ink:#06231c;
+  --glass:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.045));
+  --line:rgba(255,255,255,.11); --danger:#ff6b63; --ok:#4fd6b4;
+  --purple:#a98bf5;
+  --ease:cubic-bezier(.32,.72,0,1);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:
+  radial-gradient(520px 380px at 12% -6%,rgba(79,214,180,.26),transparent 62%),
+  radial-gradient(480px 360px at 108% 14%,rgba(74,124,240,.20),transparent 62%),
+  radial-gradient(520px 420px at 60% 112%,rgba(46,184,150,.16),transparent 62%),#0b1210}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,textarea{font:inherit;color:var(--text)}
+#app{max-width:520px;margin:0 auto;min-height:100%;padding:calc(env(safe-area-inset-top) + 10px) 16px calc(96px + env(safe-area-inset-bottom))}
+
+/* ---------- рекламный баннер ---------- */
+.ad{position:relative;display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:14px 12px 15px 18px;border-radius:26px;background:#141414;border:1px solid rgba(255,255,255,.07);box-shadow:0 14px 34px -18px rgba(0,0,0,.8);animation:adIn .5s var(--ease)}
+@keyframes adIn{from{opacity:0;transform:translateY(-10px) scale(.98)}to{opacity:1;transform:none}}
+.ad[hidden]{display:none}
+.ad-main{flex:1;min-width:0;text-align:left;display:block}
+.ad-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.ad-label{color:var(--purple);font-weight:600;font-size:19px;letter-spacing:-.2px}
+.ad-name{font-weight:700;font-size:19px;letter-spacing:-.2px}
+.ad-what{padding:3px 13px 4px;border-radius:14px;background:rgba(169,139,245,.18);color:var(--purple);font-size:16px}
+.ad-text{font-size:19px;line-height:1.28;letter-spacing:-.15px;overflow-wrap:anywhere}
+.ad-x{flex:0 0 auto;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#8e8e93}
+.ad-x:active{background:rgba(255,255,255,.08)}
+.ad-x svg{width:24px;height:24px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round}
+
+/* ---------- общие блоки ---------- */
+.screen{display:none}.screen.on{display:block;animation:fade .28s var(--ease)}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+h1{font-size:28px;margin:6px 2px 4px;letter-spacing:-.6px;font-weight:650}
+.lead{margin:0 2px 18px;color:var(--text-2);font-size:15px}
+.card{background:var(--glass);border:1px solid var(--line);border-radius:26px;padding:20px;margin-bottom:14px;-webkit-backdrop-filter:blur(26px) saturate(170%);backdrop-filter:blur(26px) saturate(170%);box-shadow:0 1px 0 rgba(255,255,255,.12) inset,0 22px 50px -30px rgba(0,0,0,.8)}
+.cap{font-size:13px;color:var(--text-2);margin:0 0 8px;font-weight:500}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px 18px;border-radius:18px;font-weight:600;background:linear-gradient(180deg,#43e0bd,var(--accent-fill));color:var(--accent-ink);box-shadow:0 10px 24px -10px rgba(46,184,150,.9),0 1px 0 rgba(255,255,255,.4) inset;transition:transform .2s var(--ease),opacity .2s}
+.btn:active{transform:scale(.975)}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.btn.ghost{background:rgba(255,255,255,.08);color:var(--text);box-shadow:0 1px 0 rgba(255,255,255,.12) inset}
+.btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- номер ---------- */
+.number{font-size:31px;font-weight:650;letter-spacing:-.7px;font-variant-numeric:tabular-nums;line-height:1.15;overflow-wrap:anywhere;margin:2px 0 14px}
+.number small{display:block;font-size:13px;font-weight:500;letter-spacing:0;color:var(--text-2);margin-bottom:6px}
+.row{display:flex;gap:10px}
+.row .btn{padding:12px 14px;font-size:15px}
+.sk{background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.14),rgba(255,255,255,.06));background-size:200% 100%;animation:sk 1.3s linear infinite;border-radius:12px;height:38px}
+@keyframes sk{to{background-position:-200% 0}}
+
+/* ---------- код ---------- */
+.otp{display:flex;gap:10px;margin:4px 0 12px}
+.otp i{flex:1;aspect-ratio:1/1.12;max-width:74px;border-radius:18px;display:grid;place-items:center;font-style:normal;font-size:30px;font-weight:650;font-variant-numeric:tabular-nums;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);color:var(--text-3)}
+.otp.live i{border-color:rgba(79,214,180,.55);color:var(--text);background:rgba(46,184,150,.16);animation:pop .45s var(--ease) backwards}
+.otp.live i:nth-child(2){animation-delay:.05s}.otp.live i:nth-child(3){animation-delay:.1s}.otp.live i:nth-child(4){animation-delay:.15s}
+@keyframes pop{from{transform:scale(.7);opacity:0}}
+.wait{display:flex;align-items:center;gap:9px;color:var(--text-2);font-size:14px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25;transform:scale(.7)}}
+.steps{margin:0;padding:0;list-style:none;display:grid;gap:12px;color:var(--text-2);font-size:15px}
+.steps li{display:flex;gap:12px;align-items:flex-start}
+.steps b{flex:0 0 26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;background:rgba(79,214,180,.16);color:var(--accent)}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:12px;font-size:13px;font-weight:600;background:rgba(79,214,180,.16);color:var(--accent)}
+.badge.off{background:rgba(255,255,255,.08);color:var(--text-2)}
+
+/* ---------- магазин ---------- */
+.prod{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:16px;margin-bottom:10px;border-radius:24px;background:var(--glass);border:1px solid var(--line);transition:transform .2s var(--ease)}
+.prod:active{transform:scale(.98)}
+.pico{flex:0 0 48px;height:48px;border-radius:16px;display:grid;place-items:center;background:rgba(79,214,180,.14);color:var(--accent)}
+.pico svg{width:25px;height:25px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pbody{flex:1;min-width:0}.pt{font-weight:600;font-size:16px}.pd{color:var(--text-2);font-size:13.5px;margin-top:2px}
+.price{flex:0 0 auto;padding:8px 13px;border-radius:15px;background:rgba(255,255,255,.09);font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap}
+.h2{font-size:13px;color:var(--text-2);font-weight:500;margin:22px 4px 10px}
+.ord{display:flex;justify-content:space-between;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line);font-size:14.5px}
+.ord:last-child{border:0}.ord span{color:var(--text-2);font-size:13px;display:block}
+.st-granted{color:var(--ok)}.st-refunded,.st-failed{color:var(--danger)}.st-paid{color:#ffcf5e}
+.notice{padding:13px 15px;border-radius:18px;background:rgba(255,207,94,.12);color:#ffd98a;font-size:14px;margin-bottom:14px}
+
+/* ---------- поддержка ---------- */
+.chat{display:flex;flex-direction:column;gap:8px;min-height:240px;max-height:calc(100dvh - 330px);overflow-y:auto;padding:4px 2px 10px}
+.msg{max-width:84%;padding:10px 14px;border-radius:20px;font-size:15px;overflow-wrap:anywhere;white-space:pre-wrap}
+.msg.me{align-self:flex-end;background:linear-gradient(180deg,#43e0bd,var(--accent-fill));color:var(--accent-ink);border-bottom-right-radius:7px}
+.msg.them{align-self:flex-start;background:rgba(255,255,255,.1);border-bottom-left-radius:7px}
+.msg time{display:block;font-size:11px;opacity:.6;margin-top:3px}
+.compose{display:flex;gap:10px;align-items:flex-end}
+.compose textarea{flex:1;resize:none;max-height:120px;padding:12px 15px;border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,.07);outline:0}
+.compose textarea:focus{border-color:rgba(79,214,180,.6)}
+.send{flex:0 0 46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--accent-fill);color:var(--accent-ink)}
+.send svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- таб-бар, лист, тост ---------- */
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom));width:min(488px,calc(100% - 28px));display:flex;padding:6px;border-radius:26px;background:rgba(18,28,25,.78);border:1px solid var(--line);-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);box-shadow:0 18px 40px -16px rgba(0,0,0,.9);z-index:20}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 7px;border-radius:20px;font-size:11.5px;color:var(--text-2);transition:background .25s,color .25s}
+.tab svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab.on{background:rgba(79,214,180,.17);color:var(--accent)}
+.veil{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .25s;z-index:40}
+.veil.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:50%;bottom:0;width:min(520px,100%);transform:translate(-50%,105%);padding:22px 18px calc(22px + env(safe-area-inset-bottom));border-radius:30px 30px 0 0;background:#16211f;border:1px solid var(--line);border-bottom:0;transition:transform .38s var(--ease);z-index:50}
+.sheet.on{transform:translate(-50%,0)}
+.sheet h3{margin:0 0 4px;font-size:21px;letter-spacing:-.3px}
+.sheet p{margin:0 0 16px;color:var(--text-2);font-size:14.5px;white-space:pre-wrap}
+.field{width:100%;padding:14px 16px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.07);outline:0;margin-bottom:12px}
+.field:focus{border-color:rgba(79,214,180,.6)}
+.err{color:var(--danger);font-size:14px;margin:-4px 2px 12px;min-height:0}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 14px);transform:translate(-50%,-140%);max-width:min(440px,calc(100% - 32px));padding:12px 18px;border-radius:18px;background:rgba(30,42,38,.96);border:1px solid var(--line);font-size:14.5px;z-index:60;transition:transform .35s var(--ease);text-align:center}
+.toast.on{transform:translate(-50%,0)}
+.gate{padding:60px 24px;text-align:center;color:var(--text-2)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="ad" id="ad" hidden></div>
+
+  <section class="screen on" id="s-home">
+    <h1>Orenix</h1>
+    <p class="lead">Ваш номер для регистрации в мессенджере и код подтверждения.</p>
+
+    <div class="card">
+      <div class="number" id="num"><div class="sk"></div></div>
+      <div class="row">
+        <button class="btn ghost" id="copy-num"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="3"/><path d="M5 15V6a2 2 0 012-2h9"/></svg>Скопировать</button>
+        <button class="btn" id="open-msg" hidden>Открыть мессенджер</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="cap">Код подтверждения</p>
+      <div class="otp" id="otp"><i>·</i><i>·</i><i>·</i><i>·</i></div>
+      <div id="code-note" class="wait"><span class="dot"></span><span>Ждём запрос кода из мессенджера…</span></div>
+    </div>
+
+    <div class="card">
+      <p class="cap">Как зарегистрироваться</p>
+      <ol class="steps">
+        <li><b>1</b><span>Скопируйте номер выше</span></li>
+        <li><b>2</b><span>В Orenix Messenger нажмите «Начать общение» и введите этот номер</span></li>
+        <li><b>3</b><span>Код появится здесь — введите его в мессенджере и придумайте пароль</span></li>
+      </ol>
+      <div style="margin-top:16px" id="reg-badge"></div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-shop">
+    <h1>Магазин</h1>
+    <p class="lead">Оплата звёздами Telegram. Покупка выдаётся на ваш аккаунт сразу после оплаты.</p>
+    <div id="notice"></div>
+    <div id="shop"></div>
+    <div class="h2">История покупок</div>
+    <div class="card" id="orders" style="padding:8px 18px"></div>
+  </section>
+
+  <section class="screen" id="s-support">
+    <h1>Поддержка</h1>
+    <p class="lead">Напишите нам — ответ придёт в этот же чат.</p>
+    <div class="card" style="padding:14px">
+      <div class="chat" id="chat"></div>
+      <div class="compose">
+        <textarea id="sup-in" rows="1" maxlength="2000" placeholder="Сообщение"></textarea>
+        <button class="send" id="sup-send" aria-label="Отправить"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<nav class="tabs" id="tabs">
+  <button class="tab on" data-s="home"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8a1.5 1.5 0 01-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 014 19v-8z"/></svg>Главная</button>
+  <button class="tab" data-s="shop"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1 11.2a1.5 1.5 0 01-1.5 1.3h-9a1.5 1.5 0 01-1.5-1.3L5 8z"/><path d="M9 8V7a3 3 0 016 0v1"/></svg>Магазин</button>
+  <button class="tab" data-s="support"><svg viewBox="0 0 24 24"><path d="M20.5 12a8.2 8.2 0 01-11.9 7.3L3.5 20.5l1.3-4.4A8.2 8.2 0 1120.5 12z"/></svg>Поддержка</button>
+</nav>
+
+<div class="veil" id="veil"></div>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// initData берём из SDK, а если SDK не успел/не загрузился — из адреса (#tgWebAppData=...) или из sessionStorage
+let tg = window.Telegram && Telegram.WebApp;
+function getInitData() {
+  let d = (tg && tg.initData) || '';
+  if (!d) { try { d = new URLSearchParams(location.hash.slice(1)).get('tgWebAppData') || ''; } catch (e) {} }
+  if (d) { try { sessionStorage.setItem('orx_init', d); } catch (e) {} }
+  else { try { d = sessionStorage.getItem('orx_init') || ''; } catch (e) {} }
+  return d;
+}
+getInitData();
+if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor('#0b1210'); tg.setBackgroundColor('#0b1210'); } catch (e) {} }
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const buzz = (t) => { try { tg.HapticFeedback.notificationOccurred(t); } catch (e) {} };
+
+let S = { phone: '', registered: false, shop: [], ad: null, general: {}, orders: [] };
+let screen = 'home';
+
+async function api(path, opts = {}) {
+  const r = await fetch(path, { ...opts, headers: { 'content-type': 'application/json', 'x-init-data': getInitData() }, body: opts.body ? JSON.stringify(opts.body) : undefined });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || 'Ошибка сети');
+  return j;
+}
+let toastT;
+function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 3200); }
+
+/* ---------- реклама ---------- */
+function openLink(url) {
+  if (!url) return;
+  if (tg && /^https:\/\/t\.me\//.test(url)) tg.openTelegramLink(url); else if (tg) tg.openLink(url); else window.open(url, '_blank');
+}
+function renderAd() {
+  const a = S.ad, el = $('ad');
+  const closed = a && localStorage.getItem('adClosed') === String(a.version);
+  if (!a || !a.enabled || closed || !a.text) { el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = `<div class="ad-main" role="link" tabindex="0">
+      <div class="ad-top"><span class="ad-label">${esc(a.label || 'Реклама')}</span>${a.advertiser ? `<span class="ad-name">${esc(a.advertiser)}</span>` : ''}${a.whatText ? `<button class="ad-what" id="ad-what">${esc(a.whatText)}</button>` : ''}</div>
+      <div class="ad-text">${esc(a.text)}</div></div>
+    ${a.closable !== false ? `<button class="ad-x" id="ad-x" aria-label="Закрыть"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>` : ''}`;
+  el.querySelector('.ad-main').onclick = (e) => { if (e.target.closest('#ad-what')) return; openLink(a.link); };
+  const w = $('ad-what'); if (w) w.onclick = (e) => { e.stopPropagation(); sheet(`<h3>${esc(a.label || 'Реклама')}</h3><p>${esc(a.whatBody || '')}</p><button class="btn ghost" onclick="closeSheet()">Понятно</button>`); };
+  const x = $('ad-x'); if (x) x.onclick = () => { localStorage.setItem('adClosed', String(a.version)); el.hidden = true; };
+}
+
+/* ---------- лист ---------- */
+function sheet(html) { $('sheet').innerHTML = html; $('veil').classList.add('on'); requestAnimationFrame(() => $('sheet').classList.add('on')); }
+function closeSheet() { $('sheet').classList.remove('on'); $('veil').classList.remove('on'); }
+$('veil').onclick = closeSheet;
+
+/* ---------- главная ---------- */
+function renderHome() {
+  $('num').innerHTML = S.phone ? `<small>Ваш номер в Orenix</small>${esc(S.phone)}` : '<div class="sk"></div>';
+  $('reg-badge').innerHTML = S.registered ? '<span class="badge">✓ Аккаунт создан</span>' : '<span class="badge off">Аккаунт ещё не создан</span>';
+  const b = $('open-msg'); const url = S.general.messengerUrl;
+  b.hidden = !url; b.onclick = () => openLink(url);
+}
+$('copy-num').onclick = async () => {
+  if (!S.phone) return;
+  try { await navigator.clipboard.writeText(S.phone); } catch (e) { const t = document.createElement('textarea'); t.value = S.phone; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); }
+  buzz('success'); toast('Номер скопирован');
+};
+
+let codeTimer;
+function renderCode(c) {
+  const otp = $('otp'), note = $('code-note');
+  if (c && c.code) {
+    otp.classList.add('live'); otp.innerHTML = c.code.split('').map((d) => `<i>${esc(d)}</i>`).join('');
+    const left = Math.max(0, Math.round((new Date(c.expiresAt) - Date.now()) / 1000));
+    note.innerHTML = `<span>Введите код в мессенджере. Действует ещё ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}</span>`;
+  } else {
+    otp.classList.remove('live'); otp.innerHTML = '<i>·</i><i>·</i><i>·</i><i>·</i>';
+    note.innerHTML = '<span class="dot"></span><span>Ждём запрос кода из мессенджера…</span>';
+  }
+}
+let lastCode = null;
+async function pollCode() {
+  if (screen !== 'home' || document.hidden || !S.phone) return;
+  try { const c = await api('/api/code'); if ((c.code || null) !== lastCode) { lastCode = c.code || null; if (lastCode) buzz('success'); } renderCode(c); } catch (e) {}
+}
+setInterval(pollCode, 3000);
+setInterval(() => { if (lastCode) pollCode(); }, 1000);
+
+/* ---------- магазин ---------- */
+const ICONS = {
+  premium: '<path d="M12 3.5l2.5 5.2 5.7.8-4.1 4 1 5.6L12 16.4 6.9 19.1l1-5.6-4.1-4 5.7-.8L12 3.5z"/>',
+  phone: '<rect x="7" y="3" width="10" height="18" rx="2.6"/><path d="M11 18h2"/>',
+  username: '<circle cx="12" cy="12" r="3.6"/><path d="M15.6 12v1.4a2.4 2.4 0 004.8 0V12a8.4 8.4 0 10-3.4 6.7"/>',
+  coins: '<circle cx="12" cy="12" r="8.5"/><path d="M9 10.5c.4-1.2 1.4-1.8 3-1.8s2.6.6 3 1.8M9 14c.4 1.2 1.4 1.8 3 1.8s2.6-.6 3-1.8"/>'
+};
+function renderShop() {
+  $('notice').innerHTML = S.registered ? '' : '<div class="notice">Покупки выдаются на аккаунт в мессенджере. Сначала зарегистрируйтесь со своим номером — потом магазин откроется.</div>';
+  $('shop').innerHTML = S.shop.length ? S.shop.map((p) => `<button class="prod" data-id="${esc(p.id)}"><span class="pico"><svg viewBox="0 0 24 24">${ICONS[p.kind] || ICONS.coins}</svg></span><span class="pbody"><div class="pt">${esc(p.title)}</div><div class="pd">${esc(p.desc)}</div></span><span class="price">${esc(p.stars)} ⭐</span></button>`).join('') : '<div class="lead">Товаров пока нет.</div>';
+  $('shop').querySelectorAll('.prod').forEach((b) => b.onclick = () => openProduct(S.shop.find((p) => p.id === b.dataset.id)));
+  const L = { granted: 'Выдано', paid: 'Оплачено, выдаём…', refunded: 'Возврат Stars', failed: 'Ошибка' };
+  $('orders').innerHTML = S.orders.length ? S.orders.map((o) => `<div class="ord"><div>${esc(o.title)}<span>${new Date(o.createdAt).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span></div><div style="text-align:right">${esc(o.stars)} ⭐<span class="st-${esc(o.status)}">${esc(L[o.status] || o.status)}</span></div></div>`).join('') : '<div class="ord" style="color:var(--text-2)">Покупок пока нет</div>';
+}
+function openProduct(p) {
+  if (!p) return;
+  const needName = p.kind === 'username';
+  sheet(`<h3>${esc(p.title)}</h3><p>${esc(p.desc)}</p>
+    ${needName ? '<input class="field" id="p-name" placeholder="Юзернейм, например orenix_fan" autocapitalize="off" autocomplete="off" spellcheck="false" maxlength="33"><div class="err" id="p-err"></div>' : '<div class="err" id="p-err"></div>'}
+    <button class="btn" id="p-buy">Оплатить ${esc(p.stars)} ⭐</button>`);
+  $('p-buy').onclick = async () => {
+    const btn = $('p-buy'), err = $('p-err'); err.textContent = '';
+    btn.disabled = true;
+    try {
+      const r = await api('/api/order', { method: 'POST', body: { productId: p.id, username: needName ? $('p-name').value : undefined } });
+      closeSheet();
+      if (!tg) { toast('Откройте мини-апп в Telegram'); return; }
+      tg.openInvoice(r.link, (status) => {
+        if (status === 'paid') { buzz('success'); toast('Оплачено! Выдаём покупку…'); waitGrant(); }
+        else if (status === 'failed') { buzz('error'); toast('Оплата не прошла'); }
+      });
+    } catch (e) { err.textContent = e.message; btn.disabled = false; }
+  };
+}
+async function waitGrant() {
+  for (let i = 0; i < 12; i++) {
+    await new Promise((r) => setTimeout(r, 1500));
+    await load(true);
+    if (S.orders[0] && S.orders[0].status !== 'paid') { toast(S.orders[0].status === 'granted' ? 'Готово — покупка выдана' : 'Не удалось выдать, Stars вернутся'); return; }
+  }
+}
+
+/* ---------- поддержка ---------- */
+let supLast = 0;
+function renderChat(d) {
+  const el = $('chat'); const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+  const fmt = (t) => new Date(t).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  const first = d.greeting ? `<div class="msg them">${esc(d.greeting)}</div>` : '';
+  el.innerHTML = first + d.messages.map((m) => `<div class="msg ${m.fromAdmin ? 'them' : 'me'}">${esc(m.body)}<time>${fmt(m.at)}</time></div>`).join('');
+  const last = d.messages.length ? d.messages[d.messages.length - 1].id : 0;
+  if (atBottom || last !== supLast) el.scrollTop = el.scrollHeight;
+  supLast = last;
+}
+async function loadSupport() { try { renderChat(await api('/api/support')); } catch (e) {} }
+setInterval(() => { if (screen === 'support' && !document.hidden) loadSupport(); }, 4000);
+async function sendSupport() {
+  const i = $('sup-in'); const body = i.value.trim(); if (!body) return;
+  i.value = ''; i.style.height = 'auto';
+  try { await api('/api/support', { method: 'POST', body: { body } }); await loadSupport(); } catch (e) { i.value = body; toast(e.message); }
+}
+$('sup-send').onclick = sendSupport;
+$('sup-in').addEventListener('input', (e) => { e.target.style.height = 'auto'; e.target.style.height = Math.min(120, e.target.scrollHeight) + 'px'; });
+$('sup-in').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendSupport(); } });
+
+/* ---------- навигация и загрузка ---------- */
+function go(name) {
+  screen = name;
+  document.querySelectorAll('.screen').forEach((s) => s.classList.toggle('on', s.id === 's-' + name));
+  document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('on', t.dataset.s === name));
+  window.scrollTo({ top: 0 });
+  if (name === 'support') loadSupport();
+  if (name === 'home') pollCode();
+  if (name === 'shop') load(true);
+}
+document.querySelectorAll('.tab').forEach((t) => t.onclick = () => { try { tg.HapticFeedback.selectionChanged(); } catch (e) {} go(t.dataset.s); });
+
+async function load(quiet) {
+  try { S = await api('/api/state'); renderAd(); renderHome(); renderShop(); if (!quiet) pollCode(); }
+  catch (e) { if (!quiet) { $('app').innerHTML = `<div class="gate"><h1>Orenix</h1><p>${esc(e.message)}</p></div>`; $('tabs').hidden = true; } }
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) load(true); });
+function boot() {
+  tg = window.Telegram && Telegram.WebApp;
+  if (tg) { try { tg.ready(); tg.expand(); } catch (e) {} }
+  if (getInitData()) { load(); return; }
+  const why = !window.Telegram ? 'Скрипт Telegram не загрузился (проверьте интернет/VPN и перезапустите мини-апп).' : 'Telegram не передал данные запуска. Откройте мини-апп кнопкой меню бота или кнопкой «Открыть Orenix» после /start.';
+  $('app').innerHTML = '<div class="gate"><h1>Orenix</h1><p>' + esc(why) + '</p></div>'; $('tabs').hidden = true;
+}
+if (document.readyState === 'complete') boot(); else window.addEventListener('load', boot);
+</script>
+</body>
+</html>
